@@ -105,6 +105,7 @@ class ChatInputToolbar extends StatelessWidget {
                         child: Directionality(
                           textDirection: textDirection,
                           child: TextField(
+                            autocorrect: true,
                             enableInteractiveSelection: true,
                             inputFormatters: inputFormatters,
                             focusNode: focusNode,
