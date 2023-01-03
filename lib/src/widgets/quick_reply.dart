@@ -3,15 +3,15 @@ part of dash_chat;
 class QuickReply extends StatelessWidget {
   final Reply reply;
 
-  final Function(Reply) onReply;
+  final Function(Reply)? onReply;
 
-  final BoxDecoration quickReplyStyle;
+  final BoxDecoration? quickReplyStyle;
 
-  final TextStyle quickReplyTextStyle;
+  final TextStyle? quickReplyTextStyle;
 
-  final Widget Function(Reply) quickReplyBuilder;
+  final Widget Function(Reply)? quickReplyBuilder;
 
-  final BoxConstraints constraints;
+  final BoxConstraints? constraints;
 
   const QuickReply({
     this.quickReplyBuilder,
@@ -19,18 +19,21 @@ class QuickReply extends StatelessWidget {
     this.quickReplyTextStyle,
     this.constraints,
     this.onReply,
-    this.reply,
+    required this.reply,
   });
 
   @override
   Widget build(BuildContext context) {
-    final constraints = this.constraints ?? BoxConstraints(maxHeight: MediaQuery.of(context).size.height, maxWidth: MediaQuery.of(context).size.width);
+    final constraints = this.constraints ??
+        BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height,
+            maxWidth: MediaQuery.of(context).size.width);
     return GestureDetector(
       onTap: () {
-        onReply(reply);
+        onReply!(reply);
       },
       child: quickReplyBuilder != null
-          ? quickReplyBuilder(reply)
+          ? quickReplyBuilder!(reply)
           : Container(
               margin: EdgeInsets.only(
                   left: 5.0, right: 5.0, top: 5.0, bottom: 10.0),
@@ -42,10 +45,9 @@ class QuickReply extends StatelessWidget {
                           width: 1.0, color: Theme.of(context).accentColor),
                       borderRadius: BorderRadius.circular(5.0),
                     ),
-              constraints: BoxConstraints(
-                  maxWidth: constraints.maxWidth / 3),
+              constraints: BoxConstraints(maxWidth: constraints.maxWidth / 3),
               child: Text(
-                reply.title,
+                reply.title!,
                 style: quickReplyTextStyle != null
                     ? quickReplyTextStyle
                     : TextStyle(
