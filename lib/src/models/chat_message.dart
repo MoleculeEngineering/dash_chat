@@ -8,51 +8,50 @@ class ChatMessage {
   /// and [optional] paramter called [messageIdGenerator].
   /// [messageIdGenerator] take a function with this
   /// signature [String Function()]
-  String id;
+  String? id;
 
   /// Actual text message.
-  String text;
+  String? text;
 
   /// It's a [non-optional] pararmter which specifies the time the
   /// message was delivered takes a [DateTime] object.
-  DateTime createdAt;
+  late DateTime createdAt;
 
   /// Takes a [ChatUser] object which is used to distinguish between
   /// users and also provide avaatar URLs and name.
-  ChatUser user;
+  ChatUser? user;
 
   /// A [non-optional] parameter which is used to display images
   /// takes a [Sring] as a url
-  String image;
+  String? image;
 
   /// A [non-optional] parameter which is used to display vedio
   /// takes a [Sring] as a url
-  String video;
+  String? video;
 
   /// A [non-optional] parameter which is used to show quick replies
   /// to the user
-  QuickReplies quickReplies;
+  QuickReplies? quickReplies;
 
   /// Allows to set custom-properties that could help with implementing custom
   /// functionality to dashchat.
-  Map<String, dynamic> customProperties;
+  Map<String, dynamic>? customProperties;
 
   /// Allows to set buttons that could help with implementing custom
   /// actions in message container.
-  List<Widget> buttons;
+  List<Widget>? buttons;
 
-  ChatMessage({
-    String id,
-    @required this.text,
-    @required this.user,
-    this.image,
-    this.video,
-    this.quickReplies,
-    String Function() messageIdGenerator,
-    DateTime createdAt,
-    this.customProperties,
-    this.buttons
-  }) {
+  ChatMessage(
+      {String? id,
+      required this.text,
+      required this.user,
+      this.image,
+      this.video,
+      this.quickReplies,
+      String Function()? messageIdGenerator,
+      DateTime? createdAt,
+      this.customProperties,
+      this.buttons}) {
     this.createdAt = createdAt != null ? createdAt : DateTime.now();
     this.id = id != null
         ? id
@@ -71,7 +70,7 @@ class ChatMessage {
     quickReplies = json['quickReplies'] != null
         ? QuickReplies.fromJson(json['quickReplies'])
         : null;
-    customProperties = json['customProperties'] as Map<String, dynamic>;
+    customProperties = json['customProperties'] as Map<String, dynamic>?;
   }
 
   Map<String, dynamic> toJson() {
@@ -83,7 +82,7 @@ class ChatMessage {
       data['image'] = this.image;
       data['video'] = this.video;
       data['createdAt'] = this.createdAt.millisecondsSinceEpoch;
-      data['user'] = user.toJson();
+      data['user'] = user!.toJson();
       data['quickReplies'] = quickReplies?.toJson();
       data['customProperties'] = this.customProperties;
     } catch (e, stack) {
