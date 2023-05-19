@@ -275,9 +275,9 @@ class _MessageListViewState extends State<MessageListView> {
                                                             Clipboard.setData(
                                                                 ClipboardData(
                                                                     text: widget
-                                                                        .messages![
-                                                                            i]
-                                                                        .text));
+                                                                            .messages![i]
+                                                                            .text ??
+                                                                        ""));
                                                             Navigator.pop(
                                                                 context);
                                                           },
