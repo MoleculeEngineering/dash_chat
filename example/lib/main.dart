@@ -42,8 +42,8 @@ class _MyHomePageState extends State<MyHomePage> {
     uid: "256496598",
   );
 
-  List<ChatMessage> messages = List<ChatMessage>();
-  var m = List<ChatMessage>();
+  List<ChatMessage> messages = [];
+  List<ChatMessage> m = [];
 
   var i = 0;
 
@@ -61,23 +61,24 @@ class _MyHomePageState extends State<MyHomePage> {
         i++;
       }
       Timer(Duration(milliseconds: 300), () {
-        _chatViewKey.currentState.scrollController
-          ..animateTo(
-            _chatViewKey.currentState.scrollController.position.maxScrollExtent,
-            curve: Curves.easeOut,
-            duration: const Duration(milliseconds: 300),
-          );
+        _chatViewKey.currentState?.scrollController?.animateTo(
+          _chatViewKey
+                  .currentState?.scrollController?.position.maxScrollExtent ??
+              0.0,
+          curve: Curves.easeOut,
+          duration: const Duration(milliseconds: 300),
+        );
       });
     });
   }
 
   void onSend(ChatMessage message) {
     print(message.toJson());
-    var documentReference = Firestore.instance
+    var documentReference = FirebaseFirestore.instance
         .collection('messages')
-        .document(DateTime.now().millisecondsSinceEpoch.toString());
+        .doc(DateTime.now().millisecondsSinceEpoch.toString());
 
-    Firestore.instance.runTransaction((transaction) async {
+    FirebaseFirestore.instance.runTransaction((transaction) async {
       await transaction.set(
         documentReference,
         message.toJson(),
@@ -105,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text("Chat App"),
       ),
       body: StreamBuilder(
-          stream: Firestore.instance.collection('messages').snapshots(),
+          stream: FirebaseFirestore.instance.collection('messages').snapshots(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return Center(
@@ -116,9 +117,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               );
             } else {
-              List<DocumentSnapshot> items = snapshot.data.documents;
-              var messages =
-                  items.map((i) => ChatMessage.fromJson(i.data)).toList();
+              List<DocumentSnapshot>? items =
+                  snapshot.data as List<DocumentSnapshot<DocumentSnapshot?>>?;
+              //List<DocumentSnapshot>? items = snapshot.data.document
+              var messages = items
+                  ?.map((i) => ChatMessage.fromJson(i.data as Map))
+                  .toList();
               return DashChat(
                 key: _chatViewKey,
                 inverted: true,
@@ -136,13 +140,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       'https://image.winudf.com/v2/image/Y29tLmNvZGVGYWN0b3J5LndhV2FsbHBhcGVyc19zY3JlZW5fMV8xNTMwNTY4MzE5XzA2Nw/screen-1.jpg?fakeurl=1&type=.jpg',
                       fit: BoxFit.cover,
                     ),
-                  ), 
+                  ),
                 ),
                 inputDecoration:
                     InputDecoration.collapsed(hintText: "Add message here..."),
                 dateFormat: DateFormat('yyyy-MMM-dd'),
                 timeFormat: DateFormat('HH:mm'),
-                messages: messages,
+                messages: messages ?? List.empty(),
                 showUserAvatar: false,
                 shouldStartMessagesFromTop: true,
                 showAvatarForEveryMessage: false,
@@ -164,22 +168,22 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 onQuickReply: (Reply reply) {
                   setState(() {
-                    messages.add(ChatMessage(
+                    messages?.add(ChatMessage(
                         text: reply.value,
                         createdAt: DateTime.now(),
                         user: user));
 
-                    messages = [...messages];
+                    messages = [...messages ?? List.empty()];
                   });
 
                   Timer(Duration(milliseconds: 300), () {
-                    _chatViewKey.currentState.scrollController
-                      ..animateTo(
-                        _chatViewKey.currentState.scrollController.position
-                            .maxScrollExtent,
-                        curve: Curves.easeOut,
-                        duration: const Duration(milliseconds: 300),
-                      );
+                    _chatViewKey.currentState?.scrollController?.animateTo(
+                      _chatViewKey.currentState?.scrollController?.position
+                              .maxScrollExtent ??
+                          0.0,
+                      curve: Curves.easeOut,
+                      duration: const Duration(milliseconds: 300),
+                    );
 
                     if (i == 0) {
                       systemMessage();
@@ -200,7 +204,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   IconButton(
                     icon: Icon(Icons.photo),
                     onPressed: () async {
-                      File result = await ImagePicker.pickImage(
+                      XFile? result = await ImagePicker().pickImage(
                         source: ImageSource.gallery,
                         imageQuality: 80,
                         maxHeight: 400,
@@ -208,30 +212,30 @@ class _MyHomePageState extends State<MyHomePage> {
                       );
 
                       if (result != null) {
-                        final StorageReference storageRef =
+                        final Reference storageRef =
                             FirebaseStorage.instance.ref().child("chat_images");
 
-                        StorageUploadTask uploadTask = storageRef.putFile(
-                          result,
-                          StorageMetadata(
+                        UploadTask uploadTask = storageRef.putFile(
+                          File(result.path),
+                          SettableMetadata(
                             contentType: 'image/jpg',
                           ),
                         );
-                        StorageTaskSnapshot download =
-                            await uploadTask.onComplete;
 
-                        String url = await download.ref.getDownloadURL();
+                        String url =
+                            await uploadTask.snapshot.ref.getDownloadURL();
 
                         ChatMessage message =
                             ChatMessage(text: "", user: user, image: url);
 
-                        var documentReference = Firestore.instance
+                        var documentReference = FirebaseFirestore.instance
                             .collection('messages')
-                            .document(DateTime.now()
+                            .doc(DateTime.now()
                                 .millisecondsSinceEpoch
                                 .toString());
 
-                        Firestore.instance.runTransaction((transaction) async {
+                        FirebaseFirestore.instance
+                            .runTransaction((transaction) async {
                           await transaction.set(
                             documentReference,
                             message.toJson(),
